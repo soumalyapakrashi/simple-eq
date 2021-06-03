@@ -166,7 +166,8 @@ bool SimpleEQAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SimpleEQAudioProcessor::createEditor()
 {
-    return new SimpleEQAudioProcessorEditor (*this);
+    //return new SimpleEQAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -181,6 +182,62 @@ void SimpleEQAudioProcessor::setStateInformation (const void* data, int sizeInBy
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+// Returns a list of all the parameters used by our plugin
+juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::createParameterLayout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    // We will add parameters for the low-cut and the high-cut parameters.
+    // As these are continuous values, we will use the AudioParameterFloat class
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "LowCut Freq",
+        "LowCut Freq",
+        juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f, 1.0f),
+        20.0f
+    ));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "HiCut Freq",
+        "HiCut Freq",
+        juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f, 1.0f),
+        20000.0f
+    ));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "Peak Freq",
+        "Peak Freq",
+        juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f, 1.0f),
+        750.0f
+    ));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "Peak Gain",
+        "Peak Gain",
+        juce::NormalisableRange<float>(-24.0f, 24.0f, 0.5f, 1.0f),
+        0.0f
+    ));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        "Peak Quality",
+        "Peak Quality",
+        juce::NormalisableRange<float>(0.1f, 10.0f, 0.05f, 1.0f),
+        1.0f
+    ));
+
+    juce::StringArray string_array;
+    for (int i = 1; i <= 4; i++) {
+        juce::String str;
+        str << (i * 12);
+        str << " db/Oct";
+        string_array.add(str);
+    }
+
+    layout.add(std::make_unique<juce::AudioParameterChoice>("LowCut Slope", "LowCut Slope", string_array, 0));
+    layout.add(std::make_unique<juce::AudioParameterChoice>("HighCut Slope", "HighCut Slope", string_array, 0));
+    
+    return layout;
 }
 
 //==============================================================================
